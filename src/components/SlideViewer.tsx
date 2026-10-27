@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import {
   SlideConfig,
   FinancialDataset,
@@ -15,6 +17,11 @@ import {
   TrendingUp,
   TrendingDown,
   Info,
+  Download,
+  FileImage,
+  FileText,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
 
 interface SlideViewerProps {
@@ -113,6 +120,71 @@ export const SlideViewer: React.FC<SlideViewerProps> = ({
     });
   };
 
+  const slideCanvasRef = useRef<HTMLDivElement>(null);
+  const [isExportingSlide, setIsExportingSlide] = useState(false);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
+
+  const handleExportAsImage = async () => {
+    if (!slideCanvasRef.current) return;
+    try {
+      setIsExportingSlide(true);
+      setIsExportMenuOpen(false);
+      const canvas = await html2canvas(slideCanvasRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const safeTitle = slide.title.replace(/[^a-zA-Z0-9]/g, '_');
+      const safeCompany = dataset.companyName.replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `${safeCompany}_Slide_${slideIndex + 1}_${safeTitle}.png`;
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+      setExportNotice(`Exported PNG: ${filename}`);
+      setTimeout(() => setExportNotice(null), 3500);
+    } catch (err) {
+      console.error('Failed to export slide as image:', err);
+    } finally {
+      setIsExportingSlide(false);
+    }
+  };
+
+  const handleExportAsPDF = async () => {
+    if (!slideCanvasRef.current) return;
+    try {
+      setIsExportingSlide(true);
+      setIsExportMenuOpen(false);
+      const canvas = await html2canvas(slideCanvasRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const safeTitle = slide.title.replace(/[^a-zA-Z0-9]/g, '_');
+      const safeCompany = dataset.companyName.replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `${safeCompany}_Slide_${slideIndex + 1}_${safeTitle}.pdf`;
+
+      // 16:9 widescreen dimensions matching PowerPoint layout
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'in',
+        format: [10, 5.625],
+      });
+      pdf.addImage(imgData, 'PNG', 0, 0, 10, 5.625);
+      pdf.save(filename);
+      setExportNotice(`Exported PDF: ${filename}`);
+      setTimeout(() => setExportNotice(null), 3500);
+    } catch (err) {
+      console.error('Failed to export slide as PDF:', err);
+    } finally {
+      setIsExportingSlide(false);
+    }
+  };
+
   const handleToggleApproval = () => {
     const nextStatus = slide.reviewStatus === 'approved' ? 'draft' : 'approved';
     onUpdateSlide({
@@ -132,7 +204,7 @@ export const SlideViewer: React.FC<SlideViewerProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col xl:flex-row gap-6 p-6 overflow-y-auto bg-slate-100/60">
+    <div className="flex-1 flex flex-col xl:flex-row gap-6 p-6 overflow-y-auto bg-slate-100/60 relative">
       {/* Main Slide Canvas Container (16:9 ratio representation) */}
       <div className="flex-1 flex flex-col items-center">
         {/* Slide Controls Bar */}
@@ -150,6 +222,55 @@ export const SlideViewer: React.FC<SlideViewerProps> = ({
               <span>Numbers Locked to Ledger</span>
             </span>
 
+            {/* Export Slide Preview Button & Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                disabled={isExportingSlide}
+                className="px-2.5 py-1 rounded text-xs font-semibold bg-white text-slate-700 border border-slate-300 hover:border-slate-400 hover:bg-slate-50 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                title="Export currently active slide as Image or PDF"
+              >
+                {isExportingSlide ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-500" />
+                    <span>Capturing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-3.5 h-3.5 text-[#C59B27]" />
+                    <span>Export Slide Preview</span>
+                    <ChevronDown className="w-3 h-3 text-slate-400" />
+                  </>
+                )}
+              </button>
+
+              {isExportMenuOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-slate-200 rounded-lg shadow-lg z-30 py-1 text-xs">
+                  <button
+                    onClick={handleExportAsImage}
+                    className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2.5 text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
+                  >
+                    <FileImage className="w-4 h-4 text-blue-600 shrink-0" />
+                    <div>
+                      <span className="font-semibold block">Export as Image (PNG)</span>
+                      <span className="text-[10px] text-slate-400 block">High-resolution 16:9 image</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={handleExportAsPDF}
+                    className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2.5 text-slate-700 hover:text-slate-900 transition-colors cursor-pointer border-t border-slate-100"
+                  >
+                    <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <span className="font-semibold block">Export as PDF Document</span>
+                      <span className="text-[10px] text-slate-400 block">Standard 16:9 PDF format</span>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={handleToggleApproval}
               className={`px-3 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -164,8 +285,17 @@ export const SlideViewer: React.FC<SlideViewerProps> = ({
           </div>
         </div>
 
+        {/* Notice Toast for Single Slide Export */}
+        {exportNotice && (
+          <div className="w-full max-w-4xl mb-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-md text-xs text-emerald-800 flex items-center gap-2">
+            <Check className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{exportNotice}</span>
+          </div>
+        )}
+
         {/* The 16:9 Slide Canvas */}
         <div
+          ref={slideCanvasRef}
           className="w-full max-w-4xl aspect-[16/9] bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden flex flex-col select-none relative"
           style={{ fontFamily: theme.fontTitle }}
         >
