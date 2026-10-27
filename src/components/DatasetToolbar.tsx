@@ -1,22 +1,26 @@
 import React, { useRef } from 'react';
 import { FinancialDataset, BrandTheme } from '../types/deck';
-import { saasDataset, manufacturingDataset, brandThemes } from '../data/sampleDatasets';
-import { SlidersHorizontal, UploadCloud, RefreshCw, Sparkles, Building2, Palette } from 'lucide-react';
+import { brandThemes } from '../data/sampleDatasets';
+import { UploadCloud, Sparkles, Building2, Palette, Plus } from 'lucide-react';
 
 interface DatasetToolbarProps {
   currentDataset: FinancialDataset;
+  availableModels: FinancialDataset[];
   onSelectDataset: (dataset: FinancialDataset) => void;
   selectedTheme: BrandTheme;
   onSelectTheme: (theme: BrandTheme) => void;
   onRunDemoFlow: () => void;
+  onOpenAddModelModal: () => void;
 }
 
 export const DatasetToolbar: React.FC<DatasetToolbarProps> = ({
   currentDataset,
+  availableModels,
   onSelectDataset,
   selectedTheme,
   onSelectTheme,
   onRunDemoFlow,
+  onOpenAddModelModal,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,14 +36,14 @@ export const DatasetToolbar: React.FC<DatasetToolbarProps> = ({
         if (file.name.endsWith('.json')) {
           const parsed = JSON.parse(text);
           onSelectDataset({
-            ...saasDataset,
+            ...currentDataset,
             ...parsed,
             id: 'custom_upload_' + Date.now(),
             name: `${parsed.companyName || 'Custom Ingestion'} (${parsed.period || 'Custom Period'})`,
           });
         } else {
           // Basic CSV row parsing for P&L lines
-          const lines = text.split('\n').filter(l => l.trim().length > 0);
+          const lines = text.split('\n').filter((l) => l.trim().length > 0);
           const parsedRows = lines.slice(1).map((line, idx) => {
             const cols = line.split(',');
             return {
@@ -53,11 +57,11 @@ export const DatasetToolbar: React.FC<DatasetToolbarProps> = ({
           });
 
           onSelectDataset({
-            ...saasDataset,
+            ...currentDataset,
             id: 'custom_csv_' + Date.now(),
             name: `${file.name.replace('.csv', '')} (Uploaded CSV)`,
             companyName: file.name.replace('.csv', '').toUpperCase(),
-            pnlRows: parsedRows.length > 3 ? parsedRows : saasDataset.pnlRows,
+            pnlRows: parsedRows.length > 3 ? parsedRows : currentDataset.pnlRows,
           });
         }
       } catch (err) {
@@ -76,33 +80,38 @@ export const DatasetToolbar: React.FC<DatasetToolbarProps> = ({
           Reporting Model:
         </span>
 
-        <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
-          <button
-            onClick={() => onSelectDataset(saasDataset)}
-            className={`px-3 py-1 font-medium rounded-md transition-colors ${
-              currentDataset.id === saasDataset.id
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+        {/* Model Dropdown & Add Button */}
+        <div className="flex items-center gap-2">
+          <select
+            value={currentDataset.id}
+            onChange={(e) => {
+              const found = availableModels.find((m) => m.id === e.target.value);
+              if (found) onSelectDataset(found);
+            }}
+            aria-label="Select financial model"
+            className="bg-white border border-slate-200 rounded-md px-3 py-1 font-semibold text-slate-800 shadow-xs focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer"
           >
-            B2B Enterprise SaaS
-          </button>
+            {availableModels.map((model) => (
+              <option key={model.id} value={model.id}>
+                {model.name}
+              </option>
+            ))}
+          </select>
+
           <button
-            onClick={() => onSelectDataset(manufacturingDataset)}
-            className={`px-3 py-1 font-medium rounded-md transition-colors ${
-              currentDataset.id === manufacturingDataset.id
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            onClick={onOpenAddModelModal}
+            className="flex items-center gap-1 px-2.5 py-1 text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-md font-semibold transition-colors cursor-pointer"
+            title="Create a new financial or configure AI model"
           >
-            Robotics Manufacturing
+            <Plus className="w-3.5 h-3.5 text-[#C59B27]" />
+            <span>Add Model</span>
           </button>
         </div>
 
         {/* Custom Upload trigger */}
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-md transition-colors hover:border-slate-300"
+          className="flex items-center gap-1.5 px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-md transition-colors hover:border-slate-300 cursor-pointer"
           title="Upload custom CSV or JSON dataset"
         >
           <UploadCloud className="w-3.5 h-3.5 text-slate-500" />
@@ -127,14 +136,16 @@ export const DatasetToolbar: React.FC<DatasetToolbarProps> = ({
           <select
             value={selectedTheme.id}
             onChange={(e) => {
-              const theme = brandThemes.find(t => t.id === e.target.value);
+              const theme = brandThemes.find((t) => t.id === e.target.value);
               if (theme) onSelectTheme(theme);
             }}
             aria-label="Select brand theme"
-            className="bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-slate-400"
+            className="bg-white border border-slate-200 rounded-md px-2 py-1 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer"
           >
-            {brandThemes.map(t => (
-              <option key={t.id} value={t.id}>{t.name}</option>
+            {brandThemes.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
             ))}
           </select>
         </div>
@@ -142,16 +153,17 @@ export const DatasetToolbar: React.FC<DatasetToolbarProps> = ({
 
       {/* Right zone: 1-Click Interactive Walkthrough */}
       <div className="flex items-center gap-3">
-        <span className="text-slate-400 text-[11px]">
-          Company: <strong className="text-slate-700 font-medium">{currentDataset.companyName}</strong> · Period: <strong className="text-slate-700 font-medium">{currentDataset.period}</strong>
+        <span className="text-slate-400 text-[11px] hidden lg:inline">
+          Company: <strong className="text-slate-700 font-medium">{currentDataset.companyName}</strong> · Period:{' '}
+          <strong className="text-slate-700 font-medium">{currentDataset.period}</strong>
         </span>
 
         <button
           onClick={onRunDemoFlow}
-          className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-md font-medium hover:bg-amber-100 transition-colors shadow-xs"
+          className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-md font-medium hover:bg-amber-100 transition-colors shadow-xs cursor-pointer"
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-          <span>1-Click Generation Demo</span>
+          <span>1-Click Demo Tour</span>
         </button>
       </div>
     </div>

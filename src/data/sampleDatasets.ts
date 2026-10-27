@@ -195,6 +195,80 @@ export const manufacturingDataset: FinancialDataset = {
   ],
 };
 
+export const healthtechDataset: FinancialDataset = {
+  id: 'healthtech_q3_2026',
+  name: 'MediPulse Health AI (Digital Health)',
+  companyName: 'MediPulse Health Platforms Inc.',
+  industry: 'B2B Enterprise SaaS',
+  period: 'Q3 2026 (YTD September)',
+  currency: 'USD ($ in thousands)',
+  headlineRevenue: '$9,850k',
+  headlineEBITDA: '$1,840k',
+  grossMarginPct: '78.5%',
+  cashRunwayMonths: 21.0,
+  cashBalance: '$19,200k',
+  netBurnRate: '-$95k/mo',
+  pnlRows: [
+    { id: 'hp_rev_sub', name: 'Clinical AI Platform Subscriptions', actual: 8200, budget: 7800, priorYear: 5900, category: 'Revenue' },
+    { id: 'hp_rev_ehr', name: 'EHR Integration & Onboarding', actual: 1650, budget: 1500, priorYear: 1200, category: 'Revenue' },
+    { id: 'hp_rev_total', name: 'Total Revenue', actual: 9850, budget: 9300, priorYear: 7100, category: 'Revenue', isSubtotal: true },
+    { id: 'hp_cogs_hipaa', name: 'HIPAA Compliant Cloud & Model Inference', actual: 1420, budget: 1550, priorYear: 1250, category: 'COGS' },
+    { id: 'hp_cogs_supp', name: 'Clinical Specialist Support', actual: 695, budget: 720, priorYear: 610, category: 'COGS' },
+    { id: 'hp_cogs_total', name: 'Cost of Revenue', actual: 2115, budget: 2270, priorYear: 1860, category: 'COGS', isSubtotal: true },
+    { id: 'hp_gm_total', name: 'Gross Profit (78.5% Margin)', actual: 7735, budget: 7030, priorYear: 5240, category: 'Revenue', isSubtotal: true },
+    { id: 'hp_opex_rd', name: 'Medical R&D & Regulatory Clearance', actual: 2890, budget: 2950, priorYear: 2400, category: 'OpEx' },
+    { id: 'hp_opex_sm', name: 'Health System Enterprise Sales', actual: 2105, budget: 2150, priorYear: 1750, category: 'OpEx' },
+    { id: 'hp_opex_ga', name: 'Compliance, Legal & Corporate', actual: 900, budget: 880, priorYear: 790, category: 'OpEx' },
+    { id: 'hp_opex_total', name: 'Total Operating Expenses', actual: 5895, budget: 5980, priorYear: 4940, category: 'OpEx', isSubtotal: true },
+    { id: 'hp_ebitda_total', name: 'Adjusted EBITDA (18.7% Margin)', actual: 1840, budget: 1050, priorYear: 300, category: 'EBITDA', isSubtotal: true },
+  ],
+  balanceSheetRows: [
+    { id: 'hp_bs_cash', item: 'Cash and Treasury Equities', currentPeriod: 19200, priorPeriod: 17400, category: 'Current Assets' },
+    { id: 'hp_bs_ar', item: 'Health System Accounts Receivable', currentPeriod: 3200, priorPeriod: 3500, category: 'Current Assets' },
+    { id: 'hp_bs_patents', item: 'Capitalized AI Patents & FDA Filings', currentPeriod: 4800, priorPeriod: 4500, category: 'Non-Current Assets' },
+    { id: 'hp_bs_ap', item: 'Vendor Payables & Cloud Accruals', currentPeriod: 1450, priorPeriod: 1600, category: 'Current Liabilities' },
+    { id: 'hp_bs_def', item: 'Deferred Revenue (Health Systems)', currentPeriod: 7200, priorPeriod: 6400, category: 'Current Liabilities' },
+    { id: 'hp_bs_equity', item: 'Shareholders Equity', currentPeriod: 18550, priorPeriod: 17400, category: 'Equity' },
+  ],
+  cashFlowRows: [
+    { id: 'hp_cf_ops', activity: 'Operating Cash Flow (Hospital Collections)', inflowOutflow: 2200, budget: 1800, type: 'Operating' },
+    { id: 'hp_cf_inv', activity: 'Medical Device FDA Study CapEx', inflowOutflow: -450, budget: -500, type: 'Investing' },
+    { id: 'hp_cf_net', activity: 'Net Increase in Cash Position', inflowOutflow: 1750, budget: 1300, type: 'Operating' },
+  ],
+  kpis: [
+    { id: 'hp_kpi_arr', name: 'Contracted Health System ARR', value: '$38.6M', deltaQoQ: '+8.4%', deltaYoY: '+34.2%', isPositive: true, benchmark: '>25%', description: 'Recurring hospital license contracts' },
+    { id: 'hp_kpi_nrr', name: 'Net Retention Rate (NRR)', value: '124.5%', deltaQoQ: '+2.1%', deltaYoY: '+6.5%', isPositive: true, benchmark: '>120%', description: 'Departmental hospital seat expansion' },
+    { id: 'hp_kpi_cac', name: 'Enterprise CAC Payback', value: '13.8 mos', deltaQoQ: '-1.5 mos', deltaYoY: '-4.2 mos', isPositive: true, benchmark: '<16 mos', description: 'Institutional health system recovery' },
+    { id: 'hp_kpi_hipaa', name: 'HIPAA & SOC2 Compliance Rate', value: '100%', deltaQoQ: '0.0%', deltaYoY: '0.0%', isPositive: true, benchmark: '100%', description: 'Zero audit non-conformities' },
+  ],
+  risks: [
+    { id: 'hp_rk_1', title: 'Hospital Budget Approval Delays', category: 'Commercial', impact: 'Medium', likelihood: 'Medium', mitigation: 'Offered phased pilot bundles with pre-approved procurement terms.', owner: 'Chief Commercial Officer', status: 'Mitigating' },
+    { id: 'hp_rk_2', title: 'State-Level Medical AI Legislation', category: 'Regulatory', impact: 'Medium', likelihood: 'Low', mitigation: 'Retained specialized FDA/regulatory legal counsel.', owner: 'VP Regulatory Affairs', status: 'Resolved' },
+  ],
+  monthlyRevenueTrend: [
+    { month: 'Apr', actual: 2950, budget: 2850 },
+    { month: 'May', actual: 3180, budget: 3000 },
+    { month: 'Jun', actual: 3150, budget: 3100 },
+    { month: 'Jul', actual: 3320, budget: 3150 },
+    { month: 'Aug', actual: 3380, budget: 3200 },
+    { month: 'Sep', actual: 3500, budget: 3300 },
+  ],
+  ebitdaTrend: [
+    { month: 'Apr', actual: 520, budget: 320 },
+    { month: 'May', actual: 580, budget: 340 },
+    { month: 'Jun', actual: 560, budget: 350 },
+    { month: 'Jul', actual: 610, budget: 370 },
+    { month: 'Aug', actual: 640, budget: 380 },
+    { month: 'Sep', actual: 680, budget: 400 },
+  ],
+};
+
+export const defaultDatasets: FinancialDataset[] = [
+  saasDataset,
+  manufacturingDataset,
+  healthtechDataset,
+];
+
 export const initialSlides: SlideConfig[] = [
   {
     id: 'slide_1',

@@ -7,19 +7,22 @@ import { FinanceReviewTab } from './components/FinanceReviewTab';
 import { BeforeAfterShowcase } from './components/BeforeAfterShowcase';
 import { SafeguardsTab } from './components/SafeguardsTab';
 import { OneClickDemoTour } from './components/OneClickDemoTour';
-import { saasDataset, initialSlides, brandThemes } from './data/sampleDatasets';
+import { AddModelModal } from './components/AddModelModal';
+import { defaultDatasets, saasDataset, initialSlides, brandThemes } from './data/sampleDatasets';
 import { FinancialDataset, SlideConfig, BrandTheme } from './types/deck';
 import { generateBoardDeckPPTX } from './services/pptxGenerator';
 import { CheckCircle2, FileDown, X } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'studio' | 'review' | 'before_after' | 'safeguards'>('studio');
+  const [availableModels, setAvailableModels] = useState<FinancialDataset[]>(defaultDatasets);
   const [currentDataset, setCurrentDataset] = useState<FinancialDataset>(saasDataset);
   const [slides, setSlides] = useState<SlideConfig[]>(initialSlides);
   const [activeSlideId, setActiveSlideId] = useState<string>('slide_1');
   const [selectedTheme, setSelectedTheme] = useState<BrandTheme>(brandThemes[0]);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [showDemoTour, setShowDemoTour] = useState<boolean>(false);
+  const [isAddModelModalOpen, setIsAddModelModalOpen] = useState<boolean>(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const activeSlideIndex = slides.findIndex((s) => s.id === activeSlideId);
@@ -82,10 +85,12 @@ export default function App() {
       {/* Dataset Selection & Brand Theme Toolbar */}
       <DatasetToolbar
         currentDataset={currentDataset}
+        availableModels={availableModels}
         onSelectDataset={handleSelectDataset}
         selectedTheme={selectedTheme}
         onSelectTheme={setSelectedTheme}
         onRunDemoFlow={() => setShowDemoTour(true)}
+        onOpenAddModelModal={() => setIsAddModelModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -133,6 +138,16 @@ export default function App() {
         isOpen={showDemoTour}
         onClose={() => setShowDemoTour(false)}
         onTriggerRealExport={handleExportPPTX}
+      />
+
+      {/* Add & Configure Model Modal */}
+      <AddModelModal
+        isOpen={isAddModelModalOpen}
+        onClose={() => setIsAddModelModalOpen(false)}
+        onSaveModel={(newModel) => {
+          setAvailableModels((prev) => [newModel, ...prev]);
+          handleSelectDataset(newModel);
+        }}
       />
 
       {/* Export Success Notification Toast */}
